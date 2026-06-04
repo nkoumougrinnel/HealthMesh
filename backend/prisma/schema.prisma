@@ -1,0 +1,255 @@
+// HealthMesh Emergency Triage — Schema de base de donnees
+// PostgreSQL (extension TimescaleDB recommandee en production pour la table `mesures`,
+// convertie en hypertable — voir prisma/timescale.sql).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Tables de reference
+// ─────────────────────────────────────────────────────────────
+
+model Zone {
+  id         String    @id @default(uuid())
+  nom        String
+  region     String
+  lat        Float?
+  lng        Float?
+  agentCount Int       @default(0) @map("agent_count")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  agents   Agent[]
+  patients Patient[]
+
+  @@map("zones")
+}
+
+model SeuilAlerte {
+  id          String  @id @default(uuid())
+  capteurType String  @map("capteur_type")
+  ageMin      Int     @default(0) @map("age_min")
+  ageMax      Int     @default(120) @map("age_max")
+  valMin      Float   @map("val_min")
+  valMax      Float   @map("val_max")
+  unite       String
+
+  @@map("seuils_alerte")
+}
+
+model Dispositif {
+  id             String    @id @default(uuid())
+  type           String
+  serial         String    @unique
+  zoneId         String?   @map("zone_id")
+  dernierContact DateTime? @map("dernier_contact")
+  statut         String    @default("inconnu") // connecte | deconnecte | inconnu
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@map("dispositifs")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Entites principales
+// ─────────────────────────────────────────────────────────────
+
+model Agent {
+  id           String    @id @default(uuid())
+  code         String    @unique // ex: CM-001
+  nom          String
+  prenom       String
+  email        String?   @unique
+  passwordHash String    @map("password_hash")
+  region       String
+  zoneId       String?   @map("zone_id")
+  role         String    @default("agent") // agent | specialiste | admin
+  actif        Boolean   @default(true)
+  derniereSync DateTime? @map("derniere_sync")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  zone                 Zone?               @relation(fields: [zoneId], references: [id])
+  patientsReferents    Patient[]
+  sessions             SessionTriage[]
+  alertes              Alerte[]            @relation("AlerteAgent")
+  alertesPriseEnCharge Alerte[]            @relation("AlertePriseEnCharge")
+  refreshTokens        RefreshToken[]
+  consultationsAgent   ConsultationVideo[] @relation("ConsultAgent")
+  consultationsSpec    ConsultationVideo[] @relation("ConsultSpecialiste")
+  auditLogs            AuditLog[]
+
+  @@map("agents")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  agentId   String   @map("agent_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId])
+  @@map("refresh_tokens")
+}
+
+model Patient {
+  id              String    @id @default(uuid())
+  nom             String
+  prenom          String?
+  dateNaissance   DateTime? @map("date_naissance")
+  sexe            String? // M | F | Autre
+  poidsKg         Float?    @map("poids_kg")
+  zoneId          String?   @map("zone_id")
+  agentRefId      String?   @map("agent_ref_id")
+  antecedents     Json      @default("{}") // allergies, pathologies, traitements
+  contactsUrgence Json      @default("[]") @map("contacts_urgence")
+  syncStatus      String    @default("synced") @map("sync_status") // synced | pending | conflict
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  zone        Zone?           @relation(fields: [zoneId], references: [id])
+  agentRef    Agent?          @relation(fields: [agentRefId], references: [id])
+  sessions    SessionTriage[]
+  mesures     Mesure[]
+  alertes     Alerte[]
+
+  @@index([zoneId])
+  @@index([nom])
+  @@map("patients")
+}
+
+model SessionTriage {
+  id              String    @id @default(uuid())
+  patientId       String    @map("patient_id")
+  agentId         String    @map("agent_id")
+  debut           DateTime  @default(now())
+  fin             DateTime?
+  statut          String    @default("en_cours") // en_cours | complete | abandonne
+  symptomes       String[]
+  dureeSymptomes  String?   @map("duree_symptomes") // <1h | 1-6h | 6-24h | >24h
+  niveauTriage    String?   @map("niveau_triage") // ROUGE | ORANGE | VERT | GRIS
+  scoreIa         Float?    @map("score_ia")
+  recommandation  String?
+  signesCritiques Json      @default("[]") @map("signes_critiques")
+  syncStatus      String    @default("synced") @map("sync_status")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  patient        Patient             @relation(fields: [patientId], references: [id])
+  agent          Agent               @relation(fields: [agentId], references: [id])
+  mesures        Mesure[]
+  alertes        Alerte[]
+  consultations  ConsultationVideo[]
+
+  @@index([patientId])
+  @@index([agentId])
+  @@map("sessions_triage")
+}
+
+model Mesure {
+  id             String   @id @default(uuid())
+  sessionId      String   @map("session_id")
+  patientId      String   @map("patient_id")
+  capteurType    String   @map("capteur_type") // SpO2 | FC | TA_SYS | TA_DIA | TEMP | FR
+  valeur         Float
+  unite          String
+  horsNorme      Boolean  @default(false) @map("hors_norme")
+  deltaReference Float?   @map("delta_reference")
+  source         String   @default("capteur") // capteur | simulation | saisie_manuelle
+  timestamp      DateTime @default(now())
+  syncStatus     String   @default("synced") @map("sync_status")
+
+  session SessionTriage @relation(fields: [sessionId], references: [id])
+  patient Patient       @relation(fields: [patientId], references: [id])
+
+  @@index([patientId, timestamp])
+  @@index([sessionId, capteurType])
+  @@map("mesures")
+}
+
+model Alerte {
+  id               String    @id @default(uuid())
+  sessionId        String    @map("session_id")
+  patientId        String    @map("patient_id")
+  agentId          String    @map("agent_id")
+  niveau           String // ROUGE | ORANGE
+  typeAlerte       String?   @map("type_alerte")
+  valeurCritique   Json?     @map("valeur_critique")
+  priseEnChargePar String?   @map("prise_en_charge_par")
+  priseEnChargeAt  DateTime? @map("prise_en_charge_at")
+  resolueAt        DateTime? @map("resolue_at")
+  notesResolution  String?   @map("notes_resolution")
+  statut           String    @default("active") // active | en_cours | resolue
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  session    SessionTriage @relation(fields: [sessionId], references: [id])
+  patient    Patient       @relation(fields: [patientId], references: [id])
+  agent      Agent         @relation("AlerteAgent", fields: [agentId], references: [id])
+  specialiste Agent?       @relation("AlertePriseEnCharge", fields: [priseEnChargePar], references: [id])
+  consultations ConsultationVideo[]
+
+  @@index([statut])
+  @@map("alertes")
+}
+
+model ConsultationVideo {
+  id               String    @id @default(uuid())
+  sessionId        String?   @map("session_id")
+  alerteId         String?   @map("alerte_id")
+  agentId          String    @map("agent_id")
+  specialisteId    String    @map("specialiste_id")
+  debut            DateTime  @default(now())
+  fin              DateTime?
+  dureeSecondes    Int?      @map("duree_secondes")
+  notesCliniques   String?   @map("notes_cliniques")
+  diagnostic       String?
+  recommandations  String?
+  roomId           String?   @map("room_id")
+  enregistrementUrl String?  @map("enregistrement_url")
+  statut           String    @default("en_attente") // en_attente | en_cours | terminee
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  session     SessionTriage? @relation(fields: [sessionId], references: [id])
+  alerte      Alerte?        @relation(fields: [alerteId], references: [id])
+  agent       Agent          @relation("ConsultAgent", fields: [agentId], references: [id])
+  specialiste Agent          @relation("ConsultSpecialiste", fields: [specialisteId], references: [id])
+
+  @@map("consultations_video")
+}
+
+model SyncQueue {
+  id        String   @id @default(uuid())
+  agentId   String   @map("agent_id")
+  entite    String // patients | mesures | sessions | alertes
+  clientId  String   @map("client_id")
+  payload   Json
+  tentatives Int     @default(0)
+  statut    String   @default("pending") // pending | synced | conflict
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([agentId, statut])
+  @@map("sync_queue")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  agentId   String?  @map("agent_id")
+  action    String
+  entite    String
+  payload   Json?
+  ip        String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  agent Agent? @relation(fields: [agentId], references: [id])
+
+  @@index([agentId])
+  @@map("audit_logs")
+}

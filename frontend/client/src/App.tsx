@@ -9,37 +9,39 @@ import MobileLogin from "./pages/MobileLogin";
 import MobileDashboard from "./pages/MobileDashboard";
 import MobileNewTriage from "./pages/MobileNewTriage";
 import WebDashboard from "./pages/WebDashboard";
+import TabletFrame from "./components/TabletFrame";
+import TabletRedirect from "./pages/TabletRedirect";
+import { TABLET } from "@/lib/routes";
 
+const TabletPage = (Page: React.ComponentType) => () => (
+  <TabletFrame>
+    <Page />
+  </TabletFrame>
+);
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      {/* Mobile Pages */}
-      <Route path="/mobile/login" component={MobileLogin} />
-      <Route path="/mobile/dashboard" component={MobileDashboard} />
-      <Route path="/mobile/triage" component={MobileNewTriage} />
-      {/* Web Pages */}
+      {/* Application terrain — tablette */}
+      <Route path={TABLET.login} component={TabletPage(MobileLogin)} />
+      <Route path={TABLET.dashboard} component={TabletPage(MobileDashboard)} />
+      <Route path={TABLET.triage} component={TabletPage(MobileNewTriage)} />
+      {/* Anciennes URLs mobile → tablette */}
+      <Route path="/mobile/login" component={TabletRedirect} />
+      <Route path="/mobile/dashboard" component={TabletRedirect} />
+      <Route path="/mobile/triage" component={TabletRedirect} />
       <Route path="/web/dashboard" component={WebDashboard} />
       <Route path="/404" component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />

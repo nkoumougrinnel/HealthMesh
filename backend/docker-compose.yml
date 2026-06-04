@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: healthmesh-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: healthmesh
+      POSTGRES_USER: healthmesh
+      POSTGRES_PASSWORD: healthmesh
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healthmesh"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: healthmesh-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: healthmesh-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://healthmesh:healthmesh@postgres:5432/healthmesh?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: change-me-in-production-please-32chars-min
+      NODE_ENV: production
+      PORT: "3000"
+      IA_ENGINE: rules
+    ports:
+      - "3000:3000"
+    # Applique le schema + seed au demarrage, puis lance l'API.
+    command: sh -c "npx prisma db push --skip-generate && node prisma/seed.js && node src/server.js"
+
+volumes:
+  postgres_data:
