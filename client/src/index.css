@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -43,74 +46,126 @@
 }
 
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
+  --primary: #E8621A;
+  --primary-foreground: #FFFFFF;
+  --sidebar-primary: #0B1D35;
+  --sidebar-primary-foreground: #FFFFFF;
+  --chart-1: #E8621A;
+  --chart-2: #F97316;
+  --chart-3: #60A5FA;
+  --chart-4: #00C07F;
+  --chart-5: #F4C542;
   --radius: 0.65rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.235 0.015 65);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.015 65);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.015 65);
-  --secondary: oklch(0.98 0.001 286.375);
-  --secondary-foreground: oklch(0.4 0.015 65);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.623 0.214 259.815);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.235 0.015 65);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
+  --background: #FFFFFF;
+  --foreground: #0B1D35;
+  --card: #FFFFFF;
+  --card-foreground: #0B1D35;
+  --popover: #FFFFFF;
+  --popover-foreground: #0B1D35;
+  --secondary: #0B1D35;
+  --secondary-foreground: #FFFFFF;
+  --muted: #94A3B8;
+  --muted-foreground: #475569;
+  --accent: #E8621A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #E5E7EB;
+  --input: #F3F4F6;
+  --ring: #E8621A;
+  --sidebar: #0B1D35;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-accent: #E8621A;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #1E3A5F;
+  --sidebar-ring: #E8621A;
+  
+  /* HealthMesh Specific Colors */
+  --alert-red: #EF4444;
+  --alert-orange: #F97316;
+  --alert-green: #22C55E;
+  --alert-gray: #94A3B8;
+  --success: #00C07F;
+  --warning: #F4C542;
+  --info: #60A5FA;
 }
 
 .dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.85 0.005 65);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.85 0.005 65);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.85 0.005 65);
-  --secondary: oklch(0.24 0.006 286.033);
-  --secondary-foreground: oklch(0.7 0.005 65);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground:  oklch(0.92 0.005 65);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.85 0.005 65);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.488 0.243 264.376);
+  --primary: #E8621A;
+  --primary-foreground: #FFFFFF;
+  --sidebar-primary: #0B1D35;
+  --sidebar-primary-foreground: #FFFFFF;
+  --background: #0B1D35;
+  --foreground: #FFFFFF;
+  --card: #1E3A5F;
+  --card-foreground: #FFFFFF;
+  --popover: #1E3A5F;
+  --popover-foreground: #FFFFFF;
+  --secondary: #1E3A5F;
+  --secondary-foreground: #FFFFFF;
+  --muted: #64748B;
+  --muted-foreground: #CBD5E1;
+  --accent: #E8621A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #1E3A5F;
+  --input: #1E3A5F;
+  --ring: #E8621A;
+  --chart-1: #E8621A;
+  --chart-2: #F97316;
+  --chart-3: #60A5FA;
+  --chart-4: #00C07F;
+  --chart-5: #F4C542;
+  --sidebar: #0B1D35;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-accent: #E8621A;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #1E3A5F;
+  --sidebar-ring: #E8621A;
+}
+
+@layer utilities {
+  @keyframes pulse-alert {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes slide-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-pulse-alert {
+    animation: pulse-alert 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-slide-in-up {
+    animation: slide-in-up 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
 }
 
 @layer base {
@@ -119,6 +174,25 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    @apply text-4xl;
+  }
+
+  h2 {
+    @apply text-3xl;
+  }
+
+  h3 {
+    @apply text-2xl;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -130,6 +204,10 @@
   input[type="checkbox"]:not(:disabled),
   input[type="radio"]:not(:disabled) {
     @apply cursor-pointer;
+  }
+
+  button {
+    @apply transition-all duration-150 active:scale-95;
   }
 }
 

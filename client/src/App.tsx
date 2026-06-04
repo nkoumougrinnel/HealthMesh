@@ -5,13 +5,23 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import MobileLogin from "./pages/MobileLogin";
+import MobileDashboard from "./pages/MobileDashboard";
+import MobileNewTriage from "./pages/MobileNewTriage";
+import WebDashboard from "./pages/WebDashboard";
 
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
+      <Route path="/" component={Home} />
+      {/* Mobile Pages */}
+      <Route path="/mobile/login" component={MobileLogin} />
+      <Route path="/mobile/dashboard" component={MobileDashboard} />
+      <Route path="/mobile/triage" component={MobileNewTriage} />
+      {/* Web Pages */}
+      <Route path="/web/dashboard" component={WebDashboard} />
+      <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
